@@ -23,15 +23,17 @@ const CameraScreen = () => {
     })();
   }, []);
 
-  const startCapturing = () => {
+  useEffect(() => {
+    
     setIsCapturing(true);
-    const interval = setInterval(async () => { 
+      const interval = setInterval(async () => { 
       setCounter(prevCounter => prevCounter + 1);
   
       if (cameraRef.current) {
         try {
           const photoData = await cameraRef.current.takePictureAsync({ base64: true });
           socket.emit('request_camera', photoData.base64);
+          // console.log('aaa', photoData)
         } catch (error) {
           console.error('Lỗi chụp ảnh:', error);
         }
@@ -39,14 +41,15 @@ const CameraScreen = () => {
     }, 100); // 10 tấm/giây
   
     return () => clearInterval(interval); // Dọn dẹp interval khi không còn cần thiết
+  }, [isCapturing]); // Chạy khi isCapturing thay đổi
+  
+  
+  const onCameraReady = () => {
+    setIsCapturing(true); // Bắt đầu chụp ảnh khi camera đã sẵn sàng
   };
+
   
 
-  const onCameraReady = async () => {
-    if (!isCapturing) {
-      await startCapturing();
-    }
-  };
 
   if (hasPermission === null) {
     return <View />;
@@ -57,7 +60,7 @@ const CameraScreen = () => {
 
   return (
     <View style={styles.container}>
-      <CameraView style={styles.camera} ref={cameraRef} onCameraReady={onCameraReady} />
+      <CameraView style={styles.camera} ref={cameraRef} onCameraReady={onCameraReady}  />
      
     </View>
   );
