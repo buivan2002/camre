@@ -5,8 +5,8 @@ import socket from '../ulti/socketio';
 
 const CameraScreen = () => {
   const [hasPermission, setHasPermission] = useState(true);
-  const [photo, setPhoto] = useState(null);
   const cameraRef = useRef(null);
+  const [counter, setCounter] = useState(0);
   const [isCapturing, setIsCapturing] = useState(false);
   const [captureInterval, setCaptureInterval] = useState<NodeJS.Timeout | null>(null); // Định nghĩa kiểu rõ ràng
 
@@ -23,23 +23,24 @@ const CameraScreen = () => {
     })();
   }, []);
 
-  const startCapturing = async () => {
-
+  const startCapturing = () => {
     setIsCapturing(true);
-    const interval = setInterval(async () => {
+    const interval = setInterval(async () => { 
+      setCounter(prevCounter => prevCounter + 1);
+  
       if (cameraRef.current) {
         try {
           const photoData = await cameraRef.current.takePictureAsync({ base64: true });
-          setPhoto(photoData);
           socket.emit('request_camera', photoData.base64);
         } catch (error) {
           console.error('Lỗi chụp ảnh:', error);
         }
       }
-    }, 100); // 50ms giữa mỗi lần chụp (20 tấm/giây)
-
-    setCaptureInterval(interval); // Lưu interval vào state
+    }, 100); // 10 tấm/giây
+  
+    return () => clearInterval(interval); // Dọn dẹp interval khi không còn cần thiết
   };
+  
 
   const onCameraReady = async () => {
     if (!isCapturing) {

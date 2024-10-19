@@ -15,9 +15,10 @@ class WSService {
                 console.log("=== socket connected ====")
             })
 
-            this.socket.on('disconnect', (data) => {
-                console.log("=== socket disconnected ====")
-            })
+            this.socket.on('disconnect', (reason) => {
+                console.log("=== socket disconnected ====", reason);
+            });
+            
 
             this.socket.on('error', (data) => {
                 console.log("socekt error", data)
